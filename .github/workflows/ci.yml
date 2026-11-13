@@ -1,0 +1,30 @@
+name: Server checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: material_dispatch
+          POSTGRES_PASSWORD: ci-test-only
+          POSTGRES_DB: material_dispatch_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U material_dispatch -d material_dispatch_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgres://material_dispatch:ci-test-only@127.0.0.1:5432/material_dispatch_test?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go from go.mod
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          check-latest: false
+          cache: false
+      - name: Verify toolchain and run full checks
+        run: make check

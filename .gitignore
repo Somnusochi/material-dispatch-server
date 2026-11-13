@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+.cache/
+bin/
+coverage.out
+.DS_Store
+
+.data/
+
+.gitnexus/
